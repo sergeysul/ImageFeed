@@ -1,8 +1,15 @@
-//
-//  OAuthTokenStorage.swift
-//  Image Feed
-//
-//  Created by Сергей Сулятецкий on 16.09.2024.
-//
+import UIKit
 
-import Foundation
+class OAuth2TokenStorage {
+    let storage = UserDefaults.standard
+    let key = "Bearer Token"
+
+    var token: String? {
+        get {
+            storage.string(forKey: key)
+        }
+        set {
+            storage.setValue(newValue, forKey: key)
+        }
+    }
+}
