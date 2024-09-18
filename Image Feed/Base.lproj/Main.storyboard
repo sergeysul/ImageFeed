@@ -221,9 +221,12 @@
                                 <constraints>
                                     <constraint firstAttribute="height" constant="48" id="tge-BP-L9e"/>
                                 </constraints>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="17"/>
                                 <color key="tintColor" red="0.10196078431372549" green="0.10588235294117647" blue="0.13333333333333333" alpha="1" colorSpace="calibratedRGB"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="Войти"/>
+                                <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
+                                <state key="normal" title="Войти">
+                                    <color key="titleColor" red="0.1019607843" green="0.1058823529" blue="0.1333333333" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                </state>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
                                         <integer key="value" value="16"/>
@@ -245,11 +248,10 @@
                         <viewLayoutGuide key="safeArea" id="OWj-kT-cri"/>
                         <color key="backgroundColor" red="0.1019607843" green="0.1058823529" blue="0.1333333333" alpha="1" colorSpace="calibratedRGB"/>
                         <constraints>
-                            <constraint firstItem="OWj-kT-cri" firstAttribute="bottom" secondItem="dVL-fc-NhT" secondAttribute="bottom" constant="90" id="8Fd-jE-WDJ"/>
+                            <constraint firstItem="OWj-kT-cri" firstAttribute="bottom" secondItem="dVL-fc-NhT" secondAttribute="bottom" constant="90" id="4QV-zm-bKa"/>
                             <constraint firstItem="Wzf-es-2qD" firstAttribute="centerY" secondItem="MMP-Zc-B95" secondAttribute="centerY" id="9fP-nr-CHn"/>
-                            <constraint firstItem="dVL-fc-NhT" firstAttribute="centerX" secondItem="MMP-Zc-B95" secondAttribute="centerX" id="Gn1-oo-dCp"/>
                             <constraint firstItem="OWj-kT-cri" firstAttribute="trailing" secondItem="dVL-fc-NhT" secondAttribute="trailing" constant="16" id="Il8-Gi-0oR"/>
-                            <constraint firstItem="dVL-fc-NhT" firstAttribute="leading" secondItem="OWj-kT-cri" secondAttribute="leading" constant="16" id="JhY-Hi-Jla"/>
+                            <constraint firstItem="dVL-fc-NhT" firstAttribute="leading" secondItem="OWj-kT-cri" secondAttribute="leading" constant="16" id="qv7-Ru-v6C"/>
                             <constraint firstItem="Wzf-es-2qD" firstAttribute="centerX" secondItem="MMP-Zc-B95" secondAttribute="centerX" id="wb5-fX-pzY"/>
                         </constraints>
                     </view>
