@@ -3,8 +3,11 @@ import UIKit
 
 final class OAuth2Service{
     static let shared = OAuth2Service()
+    
     private var urlSession = URLSession.shared
+    
     private init() {}
+    
     private (set) var authToken: String {
         get {
             return OAuth2TokenStorage().token ?? ""
@@ -15,24 +18,32 @@ final class OAuth2Service{
     }
     
     func makeOAuthTokenRequest(code: String) -> URLRequest? {
-        let baseURL = URL(string: "https://unsplash.com")
-        let url = URL(
-            string: "/oauth/token"
-            + "?client_id=\(Constants.accessKey)"
-            + "&&client_secret=\(Constants.secretKey)"
-            + "&&redirect_uri=\(Constants.redirectURI)"
-            + "&&code=\(code)"
-            + "&&grant_type=authorization_code",
-            relativeTo: baseURL
-        )!
+        guard var baseURL = URLComponents(string: "https://unsplash.com/oauth/token") else {
+            print("Invalid URL")
+            return nil
+        }
+        
+        baseURL.queryItems = [
+            URLQueryItem(name: "client_id", value: Constants.accessKey),
+            URLQueryItem(name: "client_secret", value: Constants.secretKey),
+            URLQueryItem(name: "redirect_uri", value: Constants.redirectURI),
+            URLQueryItem(name: "code", value: code),
+            URLQueryItem(name: "grant_type", value: "authorization_code")
+        ]
+        guard let url = baseURL.url else {
+            print("Error: couldn't get the URL from the components")
+            return nil
+        }
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         return request
     }
+
     
     func fetchAuthToken(
         _ code: String,
-        complition: @escaping (Result<String,Error>) -> Void
+        completion: @escaping (Result<String,Error>) -> Void
     ) {
         guard let request = makeOAuthTokenRequest(code: code) else {
             print("Error is creating the OAuth token request")
@@ -45,9 +56,9 @@ final class OAuth2Service{
                 case .success(let body):
                     let authToken = body.accessToken
                     self.authToken = authToken
-                    complition(.success(authToken))
+                    completion(.success(authToken))
                 case .failure(let error):
-                    complition(.failure(error))
+                    completion(.failure(error))
                 }
             }
         }
@@ -56,7 +67,7 @@ final class OAuth2Service{
     
     func object(
         for request: URLRequest,
-        complition: @escaping (Result<OAuthTokenResponseBody,Error>) -> Void
+        completion: @escaping (Result<OAuthTokenResponseBody,Error>) -> Void
     ) -> URLSessionTask {
         
         let decoder = JSONDecoder()
@@ -66,7 +77,7 @@ final class OAuth2Service{
                     try decoder.decode(OAuthTokenResponseBody.self, from: data)
                 }
             }
-            complition(response)
+            completion(response)
         }
     }
 }
