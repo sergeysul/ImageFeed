@@ -1,6 +1,11 @@
 import UIKit
+import Kingfisher
+import SwiftKeychainWrapper
 
 final class ProfileViewController: UIViewController {
+    
+    private var profileService = ProfileService.shared
+    private var profileImageServiceObserver: NSObjectProtocol?
     
     var avatarImageView: UIImageView = {
         let avatar = UIImageView()
@@ -51,9 +56,44 @@ final class ProfileViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = UIColor(named: "YP Black")
         addSubviews()
         addConstrains()
         
+        guard let profile = profileService.profile else {
+            print("Error profile data")
+            return
+        }
+        updateProfileDetails(profile: profile)
+        
+        profileImageServiceObserver = NotificationCenter.default
+            .addObserver(
+                forName: ProfileImageService.didChangeNotification,
+                object: nil, queue: .main) { [weak self] _ in
+                guard let self = self else { return }
+                self.updateAvatar()
+            }
+        updateAvatar()
+    }
+    
+    func updateAvatar(){
+        guard
+            let profileImageURL = ProfileImageService.shared.avatarURL,
+            let url = URL(string: profileImageURL)
+        else {
+            print("Error:", #fileID, #function)
+            return
+        }
+        
+        let processor = RoundCornerImageProcessor(cornerRadius: 35, backgroundColor: UIColor(named: "YP Black"))
+        avatarImageView.kf.indicatorType = .activity
+        avatarImageView.kf.setImage(with: url, placeholder: UIImage(named: "Placeholder"), options: [.processor(processor)])
+    }
+    
+    private func updateProfileDetails(profile: Profile){
+        namelabel.text = profile.name
+        loginNameLabel.text = profile.loginName
+        descriptionLabel.text = profile.bio
     }
     
     func addSubviews() {
@@ -83,9 +123,19 @@ final class ProfileViewController: UIViewController {
         ])
     }
     
+    func showAlert() {
+        let alert = UIAlertController(title: "Выход из профиля", message: "Закройте окно приложения и перезайдите", preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: "ОК", style: .default)
+        
+        alert.addAction(action)
+        present(alert, animated: true)
+    }
+    
     @objc
     private func didTapLogoutButton() {
-        //TODO: Добавить логику при нажатии кнопки Logout
+        showAlert()
+        KeychainWrapper.standard.removeObject(forKey: "Bearer Token")
     }
   
 }

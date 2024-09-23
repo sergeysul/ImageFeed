@@ -1,10 +1,16 @@
 import UIKit
 
+enum AuthServiceError: Error {
+    case invalidRequest
+}
+
 
 final class OAuth2Service{
-    static let shared = OAuth2Service()
     
-    private var urlSession = URLSession.shared
+    static let shared = OAuth2Service()
+    private let urlSession = URLSession.shared
+    private var task: URLSessionTask?
+    private var lastCode: String?
     
     private init() {}
     
@@ -45,11 +51,19 @@ final class OAuth2Service{
         _ code: String,
         completion: @escaping (Result<String,Error>) -> Void
     ) {
-        guard let request = makeOAuthTokenRequest(code: code) else {
-            print("Error is creating the OAuth token request")
+        assert(Thread.isMainThread)
+        guard lastCode != code else {
+            completion(.failure(AuthServiceError.invalidRequest))
             return
         }
-        let task = object(for: request) { [weak self] result in
+        task?.cancel()
+        lastCode = code
+        guard let request = makeOAuthTokenRequest(code: code) else {
+            completion(.failure(AuthServiceError.invalidRequest))
+            return
+        }
+        
+        let task = urlSession.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
             guard let self = self else { return }
             DispatchQueue.main.async {
                 switch result {
@@ -57,27 +71,15 @@ final class OAuth2Service{
                     let authToken = body.accessToken
                     self.authToken = authToken
                     completion(.success(authToken))
+                    self.task = nil
+                    self.lastCode = nil
                 case .failure(let error):
+                    print("Failed to get accessToken")
                     completion(.failure(error))
                 }
             }
         }
+        self.task = task
         task.resume()
-    }
-    
-    func object(
-        for request: URLRequest,
-        completion: @escaping (Result<OAuthTokenResponseBody,Error>) -> Void
-    ) -> URLSessionTask {
-        
-        let decoder = JSONDecoder()
-        return urlSession.data(for: request ) { (result: Result<Data, Error>) in
-            let response = result.flatMap { data -> Result<OAuthTokenResponseBody, Error> in
-                Result {
-                    try decoder.decode(OAuthTokenResponseBody.self, from: data)
-                }
-            }
-            completion(response)
-        }
     }
 }
