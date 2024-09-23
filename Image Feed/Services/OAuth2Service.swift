@@ -8,7 +8,7 @@ enum AuthServiceError: Error {
 final class OAuth2Service{
     
     static let shared = OAuth2Service()
-    private var urlSession = URLSession.shared
+    private let urlSession = URLSession.shared
     private var task: URLSessionTask?
     private var lastCode: String?
     
@@ -63,7 +63,7 @@ final class OAuth2Service{
             return
         }
         
-        let task = urlSession.objectTask(for: request) { [weak self] result in
+        let task = urlSession.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
             guard let self = self else { return }
             DispatchQueue.main.async {
                 switch result {

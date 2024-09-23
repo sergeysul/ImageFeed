@@ -1,6 +1,6 @@
 import UIKit
 
-struct OAuthTokenResponseBody: Decodable {
+struct OAuthTokenResponseBody: Codable {
     let accessToken: String
     let tokenType: String
     let scope: String
