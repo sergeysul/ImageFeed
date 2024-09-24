@@ -45,15 +45,15 @@ extension URLSession {
                     fulfillCompletionOnTheMainThread(.success(data))
                     print("Success Status: \(statusCode)")
                 } else {
+                    print("Error: \(NetworkError.httpStatusCode(statusCode))")
                     fulfillCompletionOnTheMainThread(.failure(NetworkError.httpStatusCode(statusCode)))
-                    print("Status: \(statusCode)")
                 }
             } else if let error = error {
+                print("Error: \(NetworkError.urlRequestError(error))")
                 fulfillCompletionOnTheMainThread(.failure(NetworkError.urlRequestError(error)))
-                print(error.localizedDescription)
             } else {
+                print("Error: \(NetworkError.urlSessionError)")
                 fulfillCompletionOnTheMainThread(.failure(NetworkError.urlSessionError))
-                print(error?.localizedDescription as Any)
             }
         })
         

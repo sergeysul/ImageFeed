@@ -135,7 +135,8 @@ final class ProfileViewController: UIViewController {
     @objc
     private func didTapLogoutButton() {
         showAlert()
-        KeychainWrapper.standard.removeObject(forKey: "Bearer Token")
+        let tokenStorage = OAuth2TokenStorage()
+        tokenStorage.removeToken()
     }
   
 }
