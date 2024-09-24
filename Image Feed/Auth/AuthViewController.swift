@@ -3,7 +3,6 @@ import UIKit
 
 protocol AuthViewControllerDelegate: AnyObject {
     func didAuthenticate(_ vc: AuthViewController)
-    func showAlert()
 }
 
 
@@ -39,7 +38,7 @@ final class AuthViewController: UIViewController {
 
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
-        dismiss(animated: true)
+        vc.dismiss(animated: true)
         UIBlockingProgressHUD.show()
         oauth2Service.fetchAuthToken(code) { [self] result in
             UIBlockingProgressHUD.dismiss()
@@ -50,7 +49,12 @@ extension AuthViewController: WebViewViewControllerDelegate {
                 delegate?.didAuthenticate(self)
             case .failure(let error):
                 print("Failed to fetch OAuthToken: \(error.localizedDescription)")
-                delegate?.showAlert()
+                let alert = UIAlertController(title: "Что-то пошло не так(", message: "Не удалось войти в систему", preferredStyle: .alert)
+                present(alert, animated: true)
+                alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { action in
+                    alert.dismiss(animated: false)
+                }))
+                present(alert, animated: true)
             }
         }
     }

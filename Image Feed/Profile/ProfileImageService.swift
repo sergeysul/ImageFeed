@@ -56,7 +56,7 @@ final class ProfileImageService {
                         userInfo: ["URL": avatarURL]
                     )
             case .failure(let error):
-                print("failed to get avatarURL: \(error.localizedDescription)")
+                print("Failed to get avatarURL: \(error.localizedDescription)")
                 completion(.failure(error))
             }
         }
