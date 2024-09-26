@@ -50,7 +50,6 @@ extension AuthViewController: WebViewViewControllerDelegate {
             case .failure(let error):
                 print("Failed to fetch OAuthToken: \(error.localizedDescription)")
                 let alert = UIAlertController(title: "Что-то пошло не так(", message: "Не удалось войти в систему", preferredStyle: .alert)
-                present(alert, animated: true)
                 alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { action in
                     alert.dismiss(animated: false)
                 }))
