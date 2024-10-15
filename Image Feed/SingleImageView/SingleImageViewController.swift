@@ -1,4 +1,5 @@
 import UIKit
+import Kingfisher
 
 final class SingleImageViewController: UIViewController{
     var image: UIImage?{
@@ -10,6 +11,7 @@ final class SingleImageViewController: UIViewController{
         }
     }
     
+    var imageURL: Photo?
     @IBOutlet private var scrollView: UIScrollView!
     @IBOutlet private var imageView: UIImageView!
     
@@ -18,12 +20,27 @@ final class SingleImageViewController: UIViewController{
         imageView.image = image
         scrollView.minimumZoomScale = 0.1
         scrollView.maximumZoomScale = 1.25
+    
+        guard let imageURL else { return }
+        openImage(photo: imageURL)
         
-        guard let image else { return }
-        imageView.image = image
-        imageView.frame.size = image.size
-        rescaleAndCenterImageInScrollView(image: image)
+    }
+    
+    private func openImage(photo: Photo) {
         
+        UIBlockingProgressHUD.show()
+        imageView.kf.setImage(with: URL(string: photo.fullImageURL)) {[weak self] result in
+            UIBlockingProgressHUD.dismiss()
+
+            guard let self = self else {return}
+            switch result {
+            case .success(let imageResult):
+                self.rescaleAndCenterImageInScrollView(image: imageResult.image)
+            case .failure:
+                print("[SingleImageViewController]:[setImage]: Error getting single image")
+            }
+        }
+        imageView.frame.size = photo.size
     }
     
     @IBAction private func didTapBackButton() {
@@ -31,11 +48,9 @@ final class SingleImageViewController: UIViewController{
     }
     
     @IBAction func didTapShareButton(_ sender: UIButton) {
-        guard let image else { return }
-        let share = UIActivityViewController(
-            activityItems: [image],
-            applicationActivities: nil
-        )
+        
+        guard let image = imageView.image else { return }
+        let share = UIActivityViewController(activityItems: [image], applicationActivities: nil)
         present(share, animated: true, completion: nil)
     }
     
