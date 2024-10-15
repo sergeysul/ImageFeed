@@ -1,6 +1,7 @@
 import UIKit
 import Kingfisher
 import SwiftKeychainWrapper
+import WebKit
 
 final class ProfileViewController: UIViewController {
     
@@ -74,6 +75,7 @@ final class ProfileViewController: UIViewController {
                 self.updateAvatar()
             }
         updateAvatar()
+        logoutButton.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
     }
     
     func updateAvatar(){
@@ -124,7 +126,7 @@ final class ProfileViewController: UIViewController {
     }
     
     func showAlert() {
-        let alert = UIAlertController(title: "Выход из профиля", message: "Закройте окно приложения и перезайдите", preferredStyle: .alert)
+        let alert = UIAlertController(title: "Вы вышли из профиля", message: .none, preferredStyle: .alert)
         
         let action = UIAlertAction(title: "ОК", style: .default)
         
@@ -132,11 +134,40 @@ final class ProfileViewController: UIViewController {
         present(alert, animated: true)
     }
     
+    func logout() {
+        
+        cleanCookies()
+        KeychainWrapper.standard.removeObject(forKey: "Bearer Token")
+
+        guard let window = UIApplication.shared.windows.first else {
+            fatalError("Invalid Configuration")
+        }
+        window.rootViewController = SplashViewController()
+        window.makeKeyAndVisible()
+    }
+
+    func cleanCookies() {
+        HTTPCookieStorage.shared.removeCookies(since: Date.distantPast)
+        WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
+            records.forEach { record in
+                WKWebsiteDataStore.default().removeData(ofTypes: record.dataTypes, for: [record], completionHandler: {})
+            }
+        }
+    }
+    
+    private func showAlertLogout() {
+        let alert = UIAlertController(title: "Пока, Пока!", message: "Уверены что хотите выйти?", preferredStyle: .alert)
+        let yesButton = UIAlertAction(title: "Да", style: .default) { [weak self] _ in
+            self?.logout()
+        }
+        let noButton = UIAlertAction(title: "Нет", style: .default, handler: nil)
+        alert.addAction(yesButton)
+        alert.addAction(noButton)
+        present(alert, animated: true)
+    }
+
     @objc
     private func didTapLogoutButton() {
-        showAlert()
-        let tokenStorage = OAuth2TokenStorage()
-        tokenStorage.removeToken()
+        showAlertLogout()
     }
-  
 }
