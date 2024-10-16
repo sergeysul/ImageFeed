@@ -76,8 +76,8 @@ extension ImagesListViewController: UITableViewDataSource {
 extension ImagesListViewController {
     func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
         let photo = photos[indexPath.row]
-        guard let imageUrl = URL(string: photo.thumbImageURL) else { return }
-        
+        let imageUrl = photo.thumbImageURL
+
         cell.cellImage.kf.setImage(with: imageUrl, placeholder: UIImage(named: "PlaceholderForImage"))
         cell.cellImage.kf.indicatorType = .activity
         

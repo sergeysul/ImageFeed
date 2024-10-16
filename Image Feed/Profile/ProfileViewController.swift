@@ -7,6 +7,7 @@ final class ProfileViewController: UIViewController {
     
     private var profileService = ProfileService.shared
     private var profileImageServiceObserver: NSObjectProtocol?
+    private let tokenStorage = OAuth2TokenStorage()
     
     var avatarImageView: UIImageView = {
         let avatar = UIImageView()
@@ -137,7 +138,7 @@ final class ProfileViewController: UIViewController {
     func logout() {
         
         cleanCookies()
-        KeychainWrapper.standard.removeObject(forKey: "Bearer Token")
+        tokenStorage.removeToken()
 
         guard let window = UIApplication.shared.windows.first else {
             fatalError("Invalid Configuration")
@@ -146,7 +147,7 @@ final class ProfileViewController: UIViewController {
         window.makeKeyAndVisible()
     }
 
-    func cleanCookies() {
+    private func cleanCookies() {
         HTTPCookieStorage.shared.removeCookies(since: Date.distantPast)
         WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
             records.forEach { record in
