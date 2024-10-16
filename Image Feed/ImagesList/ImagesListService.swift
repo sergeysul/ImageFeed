@@ -5,8 +5,8 @@ struct Photo {
     let size: CGSize
     let createdAt: Date?
     let welcomeDescription: String?
-    let thumbImageURL: String
-    let fullImageURL: String
+    let thumbImageURL: URL
+    let fullImageURL: URL
     var isLiked: Bool
 }
 
@@ -51,6 +51,7 @@ final class ImagesListService{
     private let urlSession = URLSession.shared
     private var taskLike: URLSessionTask?
     private var task: URLSessionTask?
+    private static let iso8601DateFormatter = ISO8601DateFormatter()
     
     private init() {}
     
@@ -117,14 +118,18 @@ final class ImagesListService{
     }
     
     func convertPhotos(photos: [PhotoResult]) {
-        let dateFormatter = ISO8601DateFormatter()
         for photo in photos {
+            guard let thumbURL = URL(string: photo.urls.thumb), let fullURL = URL(string: photo.urls.full) else {
+                print("Error: Invalid URLs", #file, #function, #line)
+                continue
+            }
+            
             let newPhoto = Photo(id: photo.id,
                                  size: CGSize(width: photo.width, height: photo.height),
-                                 createdAt: dateFormatter.date(from: photo.createdAt ?? ""),
+                                 createdAt: photo.createdAt.flatMap { ImagesListService.iso8601DateFormatter.date(from: $0) },
                                  welcomeDescription: photo.description,
-                                 thumbImageURL: photo.urls.thumb,
-                                 fullImageURL: photo.urls.full,
+                                 thumbImageURL: thumbURL,
+                                 fullImageURL: fullURL,
                                  isLiked: photo.isLiked)
             self.photos.append(newPhoto)
         }
