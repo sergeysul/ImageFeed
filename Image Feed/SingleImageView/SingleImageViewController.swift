@@ -14,6 +14,7 @@ final class SingleImageViewController: UIViewController{
     var imageURL: Photo?
     @IBOutlet private var scrollView: UIScrollView!
     @IBOutlet private var imageView: UIImageView!
+    @IBOutlet var backButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -21,9 +22,9 @@ final class SingleImageViewController: UIViewController{
         scrollView.minimumZoomScale = 0.1
         scrollView.maximumZoomScale = 1.25
     
-        guard let imageURL else { return }
-        openImage(photo: imageURL)
-        
+        guard let photo = imageURL else { return }
+        openImage(photo: photo)
+        backButton.accessibilityIdentifier = "backButton"
     }
     
     private func openImage(photo: Photo) {

@@ -24,10 +24,11 @@ final class ImagesListCell: UITableViewCell {
     func setIsLiked(isLiked: Bool) {
         let likeImage = isLiked ? UIImage(named: "like_button_on") : UIImage(named: "like_button_off")
         likeButton.setImage(likeImage, for: .normal)
+        likeButton.accessibilityIdentifier = "likeButton"
     }
     
     
-    @IBAction func likeButtonClicked(_ sender: Any) {
+    @IBAction private func likeButtonClicked(_ sender: Any) {
         delegate?.imageListCellDidTapLike(self)
     }
     
