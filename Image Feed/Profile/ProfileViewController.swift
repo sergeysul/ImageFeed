@@ -3,11 +3,22 @@ import Kingfisher
 import SwiftKeychainWrapper
 import WebKit
 
-final class ProfileViewController: UIViewController {
+public protocol ProfileViewControllerProtocol: AnyObject{
+    var presenter: ProfilePresenterProtocol? { get set }
+    func updateAvatar()
+    func logout()
+    func showAlert(alert: UIAlertController)
+    func addSubviews()
+    func addConstrains()
+    func configure(_ presenter: ProfilePresenterProtocol)
+}
+
+class ProfileViewController: UIViewController, ProfileViewControllerProtocol {
     
     private var profileService = ProfileService.shared
     private var profileImageServiceObserver: NSObjectProtocol?
     private let tokenStorage = OAuth2TokenStorage()
+    var presenter: ProfilePresenterProtocol?
     
     var avatarImageView: UIImageView = {
         let avatar = UIImageView()
@@ -47,7 +58,7 @@ final class ProfileViewController: UIViewController {
         return label
     }()
     
-    var logoutButton: UIButton = {
+    @objc var logoutButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(named: "logout_button"), for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -59,10 +70,8 @@ final class ProfileViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor(named: "YP Black")
-        addSubviews()
-        addConstrains()
-        
-        guard let profile = profileService.profile else {
+        presenter?.viewDidLoad()
+        guard let profile = presenter?.getProfile() else {
             print("Error profile data")
             return
         }
@@ -76,18 +85,17 @@ final class ProfileViewController: UIViewController {
                 self.updateAvatar()
             }
         updateAvatar()
+        logoutButton.accessibilityIdentifier = "ExitButton"
         logoutButton.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
     }
     
+    func configure(_ presenter: ProfilePresenterProtocol){
+        self.presenter = presenter
+        self.presenter?.view = self
+    }
+    
     func updateAvatar(){
-        guard
-            let profileImageURL = ProfileImageService.shared.avatarURL,
-            let url = URL(string: profileImageURL)
-        else {
-            print("Error:", #fileID, #function)
-            return
-        }
-        
+        let url = presenter?.getAvatarUrl()
         let processor = RoundCornerImageProcessor(cornerRadius: 35, backgroundColor: UIColor(named: "YP Black"))
         avatarImageView.kf.indicatorType = .activity
         avatarImageView.kf.setImage(with: url, placeholder: UIImage(named: "Placeholder"), options: [.processor(processor)])
@@ -107,7 +115,7 @@ final class ProfileViewController: UIViewController {
         view.addSubview(logoutButton)
     }
     
-    private func addConstrains() {
+    func addConstrains() {
         NSLayoutConstraint.activate([
             avatarImageView.topAnchor.constraint(equalTo: view.topAnchor, constant: 76),
             avatarImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
@@ -124,15 +132,6 @@ final class ProfileViewController: UIViewController {
             logoutButton.centerYAnchor.constraint(equalTo: avatarImageView.centerYAnchor),
             logoutButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16)
         ])
-    }
-    
-    func showAlert() {
-        let alert = UIAlertController(title: "Вы вышли из профиля", message: .none, preferredStyle: .alert)
-        
-        let action = UIAlertAction(title: "ОК", style: .default)
-        
-        alert.addAction(action)
-        present(alert, animated: true)
     }
     
     func logout() {
@@ -156,19 +155,12 @@ final class ProfileViewController: UIViewController {
         }
     }
     
-    private func showAlertLogout() {
-        let alert = UIAlertController(title: "Пока, Пока!", message: "Уверены что хотите выйти?", preferredStyle: .alert)
-        let yesButton = UIAlertAction(title: "Да", style: .default) { [weak self] _ in
-            self?.logout()
-        }
-        let noButton = UIAlertAction(title: "Нет", style: .default, handler: nil)
-        alert.addAction(yesButton)
-        alert.addAction(noButton)
+    func showAlert(alert: UIAlertController) {
         present(alert, animated: true)
     }
-
+    
     @objc
     private func didTapLogoutButton() {
-        showAlertLogout()
+        presenter?.logout()
     }
 }

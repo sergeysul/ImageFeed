@@ -11,9 +11,16 @@ protocol WebViewViewControllerDelegate: AnyObject {
     func webViewViewControllerDidCancel(_ vc: WebViewViewController)
 }
 
+public protocol WebViewViewControllerProtocol: AnyObject {
+    var presenter: WebViewPresenterProtocol? {get set}
+    func load(request: URLRequest)
+    func setProgressValue(_ newValue: Float)
+    func setProgressHidden (_ isHidden: Bool)
+}
 
-final class WebViewViewController: UIViewController {
+final class WebViewViewController: UIViewController & WebViewViewControllerProtocol {
     
+    var presenter: WebViewPresenterProtocol?
     weak var delegate: WebViewViewControllerDelegate?
 
     @IBOutlet private var webView: WKWebView!
@@ -24,14 +31,15 @@ final class WebViewViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         webView.navigationDelegate = self
-        loadAuthView()
+        presenter?.viewDidLoad()
         estimatedProgressObservation = webView.observe(
                    \.estimatedProgress,
                    options: [],
                    changeHandler: { [weak self] _, _ in
                        guard let self = self else { return }
-                       self.updateProgress()
+                       presenter?.didUpdateProgressValue(webView.estimatedProgress)
                    })
+        webView.accessibilityIdentifier = "UnsplashWebView"
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -42,31 +50,16 @@ final class WebViewViewController: UIViewController {
         super.viewWillDisappear(animated)
     }
 
-    private func loadAuthView() {
-        guard var urlComponents = URLComponents(string: WebViewConstants.unsplashAuthorizeURLString) else {
-            print("Invalid URL: \(WebViewConstants.unsplashAuthorizeURLString)")
-            return
-        }
-
-        urlComponents.queryItems = [
-            URLQueryItem(name: "client_id", value: Constants.accessKey),
-            URLQueryItem(name: "redirect_uri", value: Constants.redirectURI),
-            URLQueryItem(name: "response_type", value: "code"),
-            URLQueryItem(name: "scope", value: Constants.accessScope)
-        ]
-
-        guard let url = urlComponents.url else {
-            print("Error: couldn't get the URL from the components")
-            return
-        }
-
-        let request = URLRequest(url: url)
+    func load(request: URLRequest) {
         webView.load(request)
     }
 
-    private func updateProgress() {
-        progressView.progress = Float(webView.estimatedProgress)
-        progressView.isHidden = fabs(webView.estimatedProgress - 1.0) <= 0.0001
+    func setProgressValue (_ newValue: Float) {
+        progressView.progress = newValue
+    }
+    
+    func setProgressHidden(_ isHidden: Bool) {
+        progressView.isHidden = isHidden
     }
     
     @IBAction private func didTapBackButton(_ sender: Any?) {

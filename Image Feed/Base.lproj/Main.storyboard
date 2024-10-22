@@ -163,6 +163,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="Rop-UD-BDX"/>
                     <connections>
+                        <outlet property="backButton" destination="Xaa-Zz-Lw0" id="vOE-Sf-P0v"/>
                         <outlet property="imageView" destination="ZBo-oy-VFV" id="h5k-md-ii4"/>
                         <outlet property="scrollView" destination="mC2-Di-bFm" id="0a6-qC-Yr1"/>
                     </connections>
@@ -239,6 +240,9 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="RwF-GD-129"/>
+                    <connections>
+                        <outlet property="inButton" destination="dVL-fc-NhT" id="5Dx-sW-8p7"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tvx-sE-iGX" sceneMemberID="firstResponder"/>
             </objects>
@@ -247,7 +251,7 @@
         <!--Web View View Controller-->
         <scene sceneID="ax7-cd-mSR">
             <objects>
-                <viewController id="KJO-1X-68h" customClass="WebViewViewController" customModule="Image_Feed" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="WebViewViewController" id="KJO-1X-68h" customClass="WebViewViewController" customModule="Image_Feed" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="ok6-7S-iab">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
